@@ -70,7 +70,7 @@ def states_to_wordclouds(hmm, obs_map, max_words=50, show=True):
 
     # For each state, convert it into a wordcloud.
     for i in range(n_states):
-        obs_lst = obs_count[i]
+        obs_lst = obs_count[i] 
         sentence = [obs_map_r[j] for j in obs_lst]
         sentence_str = ' '.join(sentence)
 
