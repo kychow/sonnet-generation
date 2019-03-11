@@ -400,118 +400,6 @@ class HiddenMarkovModel:
                 for k in range(0, self.D):
                     self.O[j][k] = O_nums[j][k] / O_denoms[j]
 
-
-
-        # for iter in range(0, N_iters):
-        #     print(iter)
-        #     for seq in X:
-        #         # INIT
-        #         M = len(seq)
-        #         marg_prob_a = [[0. for _ in range(self.L)] for _ in range(M + 1)]
-        #         marg_prob_ab = [[[0. for _ in range(self.L)] for j in range(self.L)] for _ in range(M + 1)]
-        #
-        #         # E step
-        #         alphas = self.forward(seq)
-        #         betas = self.backward(seq)
-        #
-        #         for i in range(1, M+1):
-        #             norm_const = sum(alphas[i][k] * betas[i][k] for k in range(self.L))
-        #             for j in range(self.L):
-        #                 if i < M:
-        #                     marg_prob_a[i][j] = ((alphas[i][j] * betas[i][j]) / norm_const)
-        #
-        #         for i in range(1, M):
-        #             for j in range(0, self.L):
-        #                 for k in range(0, self.L):
-        #                     num = alphas[i][j] * self.A[j][k] * self.O[j][seq[i]] * betas[i+1][k]
-        #                     denom = 0
-        #                     for a in range(0, self.L):
-        #                         for b in range(0, self.L):
-        #                             denom += (alphas[i][a] * self.O[a][seq[i]] * self.A[a][b] * betas[i+1][b])
-        #                     marg_prob_ab[i][j][k] = (num / denom)
-        #
-        #         # M step
-        #         for j in range(0, self.L):
-        #             for k in range(0, self.L):
-        #                 num = sum(marg_prob_ab[i][j][k] for i in range(M-1))
-        #                 denom = sum(marg_prob_a[i][j] for i in range(M-1))
-        #                 self.A[j][k] = (num / denom)
-        #
-        #         for j in range(0, self.L):
-        #             for k in range(0, self.D):
-        #                 num = sum(marg_prob_a[i][j] for i in range(M) if seq[i] == seq[k])
-        #                 denom = sum(marg_prob_a[i][j] for i in range(M))
-        #                 self.O[j][k] = (num / denom)
-
-
-        # for iter in range(N_iters):
-            # print(iter)
-            # for seq in X:
-            #     ## INIT
-            #     # get sequence length
-            #     M = len(seq)
-            #     # initialize marginal probabilities
-            #     marg_prob_a = [[0. for _ in range(self.L)] for _ in range(M + 1)]
-            #     marg_prob_ab = [[[0. for _ in range(self.L)] for _ in range(self.L)] for _ in range(M + 1)]
-            #
-            #     # initialize numator and denomenator vectors and matrices
-            #     A_nums = [[0. for _ in range(self.L)] for _ in range(self.L)]
-            #     A_denoms = [0. for _ in range(self.L)]
-            #     O_nums = [[0. for _ in range(self.L)] for _ in range(self.D)]
-            #     O_denoms = [0. for _ in range(self.L)]
-            #
-            #     ## E step
-            #     # compute alphas and betas
-            #     alphas = self.forward(seq)
-            #     betas = self.backward(seq)
-            #
-            #     # for each emission (1 to M+1)
-            #     for i in range(1, M+1):
-            #         norm_const = sum(alphas[i][k] * betas[i][k] for k in range(self.L))
-            #         # Compute P(y^i=j, seq)
-            #         for j in range(0, self.L):
-            #             if i < M:
-            #                 marg_prob_a[i][j] = ((alphas[i][j] * betas[i][j]) / norm_const)
-            #             # prob = (alphas[i][j] * betas[i][j])
-            #             # marg_prob_a[i][j] = prob
-            #             # if i < M:
-            #             #     marg_prob_a[i][j] = prob
-            #             # A_denoms.append(prob)
-            #             # A_nums.append(prob)
-            #             # O_nums.append(prob)
-            #             # O_denoms.append(prob)
-            #
-            #     # for each emission (1 to M)
-            #     for i in range(1, M):
-            #         for j in range(0, self.L):
-            #             for k in range(0, self.L):
-            #                 num = alphas[i][j] * self.A[j][k] * self.O[j][seq[i]] * betas[i+1][k]
-            #                 denom = 0
-            #                 for a in range(0, self.L):
-            #                     for b in range(0, self.L):
-            #                         denom += (alphas[i][a] * self.O[b][seq[i]] * self.A[a][b] * betas[i+1][b])
-            #                 marg_prob_ab[i][j][k] = (num / denom)
-            #
-            #     ## M step
-            #     for j in range(0, self.L):
-            #         for k in range(0, self.L):
-            #             num = sum(marg_prob_ab[i][j][k] for i in range(M-1))
-            #             denom = sum(marg_prob_a[i][j] for i in range(M-1))
-            #             self.A[j][k] = (num / denom)
-            #
-            #     for j in range(0, self.L):
-            #         for k in range(0, self.D):
-            #             num = 0
-            #             for i in range(0, M):
-            #                 prob = marg_prob_a[i][j]
-            #                 denom += prob
-            #                 if seq[i] == seq[k]:
-            #                     num += prob
-            #             # num = sum(marg_prob_a[i][j] for i in range(M) if seq[i] == seq[k])
-            #             # denom = sum(marg_prob_a[i][j] for i in range(M))
-            #             self.O[j][k] = (num / denom)
-
-
     def generate_emission(self, M):
         '''
         Generates an emission of length M, assuming that the starting state
@@ -542,41 +430,42 @@ class HiddenMarkovModel:
 
         return emission, states
 
-        # search_state = 1
-        # for i in range(0, M):
-        #     probs_trans_state = self.A[search_state]
-        #     sum_probs_trans_state = 0
-        #     # list of partial sums
-        #     sums_probs_trans_list = []
-        #     # randomize current state
-        #     curr_state = random.random()
-        #     for prob in probs_trans_state:
-        #         sum_probs_trans_state += prob
-        #         sums_probs_trans_list.append(sum_probs_trans_state)
-        #     for sum_i, sum in enumerate(sums_probs_trans_list):
-        #         if curr_state < sum:
-        #             search_state = sum_i
-        #             states.append(search_state)
-        #             break
-        #
-        #     sum_probs_obs_state = 0
-        #     sums_probs_obs_list = []
-        #     probs_obs_state = self.O[search_state]
-        #     # randomize current observation
-        #     curr_obs = random.random()
-        #     for prob in probs_obs_state:
-        #         sum_probs_obs_state += prob
-        #         sums_probs_obs_list.append(sum_probs_obs_state)
-        #     for sum_i, sum in enumerate(sums_probs_obs_list):
-        #         if curr_obs < sum:
-        #             # search row sum_i and state sum_i
-        #             # lool through O
-        #             emission.append(str(sum_i))
-        #             break
-        #     probs_obs_state
+    
+    def generate_sonnet_line(words_syllables_dict, obs_map_r, n_syllables):
+        '''
+        Generates an emission with M syllables, assuming that the starting state
+        is chosen uniformly at random.
 
-        return emission, states
+        Arguments:
+            n_syllables:          number of syllables of the emission to generate.
 
+        Returns:
+            words:   The randomly generated emission as a list.
+        '''
+
+        states = []
+        words = []
+        syllables = 0
+
+        start_states = [i for i in range(self.L)]
+        state1 = choice(start_states, p=self.A_start)
+        states.append(state1)
+        p_val_emissions = self.O[states[-1]]
+        emis = choice([i for i in range(self.D)], p=p_val_emissions)
+        word = obs_map_r[emis]
+        words.append(word)
+
+        while syllables < n_syllables: 
+            p_val_states = self.A[states[-1]]
+            states.append(choice([i for i in range(self.L)], p=p_val_states))
+            p_val_emissions = self.O[states[-1]]
+            emis = choice([i for i in range(self.D)], p=p_val_emissions)
+
+            word = obs_map_r[emis]
+            syllables += words_syllables_dict[word]
+            words.append(word)
+
+        return words 
 
     def probability_alphas(self, x):
         '''

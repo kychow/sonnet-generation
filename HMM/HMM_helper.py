@@ -109,6 +109,31 @@ def parse_observations(text):
 
     return obs, obs_map
 
+# map of number syllables to words and words to number of syllables
+def parse_syllables_words(text):
+    # Convert text to dataset.
+    lines = [line.split() for line in text.split('\n') if line.split()]
+
+    obs_counter = 0
+    obs = []
+    words_syllables_map = {}
+
+    for line in lines:
+        syllables = []
+        word = []
+
+        for elem in line:
+            if elem.isdigit():
+                syllables.append(elem)
+            else:
+                word.append(re.sub(r'[^\w]', '', elem).lower())
+
+        for poss_syllable in syllables:
+            words_syllables_map[word[0]] = poss_syllable 
+        
+    return words_syllables_map
+
+# reverse obs map (words to integers) to integers to words 
 def obs_map_reverser(obs_map):
     obs_map_r = {}
 
@@ -127,8 +152,17 @@ def sample_sentence(hmm, obs_map, n_words=100):
 
     return ' '.join(sentence).capitalize() + '...'
 
+def sample_line(hmm, obs_map, n_syllables=10):
+    # Get dictionary of words to syllables.
+    words_syllables_map = parse_syllables_words("../data/Syllable_dictionary.txt")
+    obs_map_r = obs_map_reverser(obs_map)
 
-####################
+    # Sample and convert sentence.
+    words = hmm.generate_sonnet_line(words_syllables_dict, obs_map_r, n_syllables)
+
+    return ' '.join(words).capitalize()
+
+###################
 # HMM VISUALIZATION FUNCTIONS
 ####################
 
