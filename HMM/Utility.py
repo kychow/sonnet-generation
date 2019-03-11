@@ -7,6 +7,7 @@
 ########################################
 import string
 import copy
+import re
 
 class Utility:
     '''
@@ -28,11 +29,20 @@ class Utility:
             line = line.strip()
             if line != '' and not line[0].isdigit():
                 words = line.split()
+                # # remove punctuation and capitalization
+                # for i in range(len(words)):
+                #     no_punc_word = words[i].lower().translate(translator)
+                #     words[i] = no_punc_word
+
                 # remove punctuation and capitalization
                 for i in range(len(words)):
-                    no_punc_word = words[i].lower().translate(translator)
-                    words[i] = no_punc_word
-
+                    # if '-' in words[i]:
+                    #     words[i] = words[i].lower()
+                    if words[i] != "I":
+                        if words[i][-1] != "'":
+                            words[i] = re.sub(r"[^\w\d'\s]" , '', words[i]).lower()
+                        else:
+                            words[i] = re.sub(r"[^\w]" , '', words[i]).lower()
                 lines.append(words)
 
         lines_numbered = copy.deepcopy(lines)

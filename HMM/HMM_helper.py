@@ -70,7 +70,7 @@ def states_to_wordclouds(hmm, obs_map, max_words=50, show=True):
 
     # For each state, convert it into a wordcloud.
     for i in range(n_states):
-        obs_lst = obs_count[i] 
+        obs_lst = obs_count[i]
         sentence = [obs_map_r[j] for j in obs_lst]
         sentence_str = ' '.join(sentence)
 
@@ -93,47 +93,45 @@ def parse_observations(text):
 
     for line in lines:
         obs_elem = []
-        
+
         for word in line:
             word = re.sub(r'[^\w]', '', word).lower()
             if word not in obs_map:
                 # Add unique words to the observations map.
                 obs_map[word] = obs_counter
                 obs_counter += 1
-            
+
             # Add the encoded word.
             obs_elem.append(obs_map[word])
-        
+
         # Add the encoded sequence.
         obs.append(obs_elem)
 
     return obs, obs_map
 
-# map of number syllables to words and words to number of syllables
-def parse_syllables_words(text):
-    # Convert text to dataset.
-    lines = [line.split() for line in text.split('\n') if line.split()]
 
-    obs_counter = 0
-    obs = []
-    words_syllables_map = {}
+def get_words_to_syllables_dict():
+    # Convert text to dataset.
+    filename = "../data/Syllable_dictionary.txt"
+    syllables_data = open(filename, "r")
+    # lines = [line.split() for line in syllables_data.split('\n') if line.split()]
+    lines = [line.strip().split() for line in syllables_data]
+
+    syllable_map = {}
+
+    words = []
+    syllables = []
 
     for line in lines:
-        syllables = []
-        word = []
+        words.append(line[0])
+        syllables.append(line[1:])
 
-        for elem in line:
-            if elem.isdigit():
-                syllables.append(elem)
-            else:
-                word.append(re.sub(r'[^\w]', '', elem).lower())
+    for i in range(len(lines)):
+        syllable_map[words[i]] = syllables[i]
 
-        for poss_syllable in syllables:
-            words_syllables_map[word[0]] = poss_syllable 
-        
-    return words_syllables_map
+    return syllable_map
 
-# reverse obs map (words to integers) to integers to words 
+# reverse obs map (words to integers) to integers to words
 def obs_map_reverser(obs_map):
     obs_map_r = {}
 
@@ -154,13 +152,16 @@ def sample_sentence(hmm, obs_map, n_words=100):
 
 def sample_line(hmm, obs_map, n_syllables=10):
     # Get dictionary of words to syllables.
-    words_syllables_map = parse_syllables_words("../data/Syllable_dictionary.txt")
+    syllable_map = get_words_to_syllables_dict()
+    # print(syllable_map)
+
     obs_map_r = obs_map_reverser(obs_map)
 
     # Sample and convert sentence.
-    words = hmm.generate_sonnet_line(words_syllables_dict, obs_map_r, n_syllables)
+    emission, states = hmm.generate_sonnet_emission(obs_map_r, syllable_map, n_syllables)
+    sonnet_line = [obs_map_r[i] for i in emission]
 
-    return ' '.join(words).capitalize()
+    return ' '.join(sonnet_line).capitalize()
 
 ###################
 # HMM VISUALIZATION FUNCTIONS
@@ -200,13 +201,13 @@ def animate_emission(hmm, obs_map, M=8, height=12, width=12, delay=1):
     arrow_p1 = 0.03
     arrow_p2 = 0.02
     arrow_p3 = 0.06
-    
+
     # Initialize.
     n_states = len(hmm.A)
     obs_map_r = obs_map_reverser(obs_map)
     wordclouds = states_to_wordclouds(hmm, obs_map, max_words=20, show=False)
 
-    # Initialize plot.    
+    # Initialize plot.
     fig, ax = plt.subplots()
     fig.set_figheight(height)
     fig.set_figwidth(width)
@@ -223,7 +224,7 @@ def animate_emission(hmm, obs_map, M=8, height=12, width=12, delay=1):
 
     # Initialize text.
     text = ax.text(text_x_offset, lim - text_y_offset, '', fontsize=24)
-        
+
     # Make the arrows.
     zorder_mult = n_states ** 2 * 100
     arrows = []
@@ -235,7 +236,7 @@ def animate_emission(hmm, obs_map, M=8, height=12, width=12, delay=1):
             y_i = y_offset + R * np.sin(np.pi * 2 * i / n_states)
             x_j = x_offset + R * np.cos(np.pi * 2 * j / n_states)
             y_j = y_offset + R * np.sin(np.pi * 2 * j / n_states)
-            
+
             dx = x_j - x_i
             dy = y_j - y_i
             d = np.sqrt(dx**2 + dy**2)
