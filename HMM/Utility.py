@@ -1,10 +1,3 @@
-########################################
-# CS/CNS/EE 155 2017
-# Problem Set 5
-#
-# Author:       Avishek Dutta
-# Description:  Set 5
-########################################
 import string
 import copy
 import re
