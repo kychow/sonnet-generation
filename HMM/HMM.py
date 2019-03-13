@@ -457,6 +457,7 @@ class HiddenMarkovModel:
         tot_syllables = 0
         tot_syllables += int(re.search(r'\d+', syllables_map[start_word][-1]).group())
 
+        # meet syllable count requirement (n_syllables)
         while tot_syllables < n_syllables:
             p_val_states = self.A[states[-1]]
             pot_state = choice([i for i in range(self.L)], p=p_val_states)
