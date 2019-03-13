@@ -36,10 +36,13 @@ class Utility:
 
                 # remove punctuation and capitalization
                 for i in range(len(words)):
-                    # if '-' in words[i]:
-                    #     words[i] = words[i].lower()
-                    if words[i][-1] == "'" and words[i][0] != "'" and words[i] not in ["th'", "t'"]:
-                        words[i] = re.sub(r"[^\w\s-]" , '', words[i]).lower()
+                    if words[i][-1] in [",", ".", "!", "?"]:
+                        words[i] = words[i][:-1]
+                    if words[i][-1] == "'" or words[i][0] == "'":
+                        if words[i] not in ["th'", "t'", "'gainst", "'greeing", "'scaped", "'tis", "'twixt"]:
+                            words[i] = re.sub(r"[^\w\s-]" , '', words[i]).lower()
+                        else:
+                            words[i] = re.sub(r"[^\w'\s-]" , '', words[i]).lower()
                     else:
                         words[i] = re.sub(r"[^\w'\s-]" , '', words[i]).lower()
                 lines.append(words)

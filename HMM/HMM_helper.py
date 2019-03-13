@@ -159,7 +159,15 @@ def sample_line(hmm, obs_map, n_syllables=10):
 
     # Sample and convert sentence.
     emission, states = hmm.generate_sonnet_emission(obs_map_r, syllable_map, n_syllables)
-    sonnet_line = [obs_map_r[i] for i in emission]
+    # sonnet_line = [obs_map_r[i] for i in emission]
+    sonnet_line = []
+    # proper_nouns = ["i"]
+    for i in emission:
+        word = obs_map_r[i]
+        if word == "i":
+            # word = word.capitalize()
+            word = "I"
+        sonnet_line.append(word)
 
     return ' '.join(sonnet_line).capitalize()
 
