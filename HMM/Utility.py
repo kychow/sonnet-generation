@@ -38,11 +38,10 @@ class Utility:
                 for i in range(len(words)):
                     # if '-' in words[i]:
                     #     words[i] = words[i].lower()
-                    if words[i] != "I":
-                        if words[i][-1] != "'":
-                            words[i] = re.sub(r"[^\w\d'\s]" , '', words[i]).lower()
-                        else:
-                            words[i] = re.sub(r"[^\w]" , '', words[i]).lower()
+                    if words[i][-1] == "'" and words[i][0] != "'" and words[i] not in ["th'", "t'"]:
+                        words[i] = re.sub(r"[^\w\s-]" , '', words[i]).lower()
+                    else:
+                        words[i] = re.sub(r"[^\w'\s-]" , '', words[i]).lower()
                 lines.append(words)
 
         lines_numbered = copy.deepcopy(lines)

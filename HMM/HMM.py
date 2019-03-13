@@ -454,10 +454,10 @@ class HiddenMarkovModel:
         emission.append(choice([i for i in range(self.D)], p=p_val_emissions))
         start_word = obs_map_r[emission[0]]
         tot_syllables = 0
-        try:
-            tot_syllables += int(syllables_map[start_word][-1])
-        except Exception:
-            pass
+        # try:
+        tot_syllables += int(syllables_map[start_word][-1])
+        # except Exception:
+            # pass
         while tot_syllables <= n_syllables:
             p_val_states = self.A[states[-1]]
             pot_state = choice([i for i in range(self.L)], p=p_val_states)
@@ -465,22 +465,21 @@ class HiddenMarkovModel:
             p_val_emissions = self.O[states[-1]]
             pot_emission = choice([i for i in range(self.D)], p=p_val_emissions)
 
-            # pot_word = list(obs_map.keys())[list(obs_map.values()).index(pot_emission)]
             pot_word = obs_map_r[pot_emission]
-            try:
-                # print(pot_word)
-                pot_word_syllables_list = syllables_map[pot_word]
-                pot_word_syllables = int(pot_word_syllables_list[-1])
-                # if (tot_syllables + pot_word_syllables) <= n_syllables:
-                #     states.append(pot_state)
-                #     emission.append(pot_emission)
-                #     tot_syllables += pot_word_syllables
+            pot_word_syllables_list = syllables_map[pot_word]
+            pot_word_syllables = int(pot_word_syllables_list[-1])
+
+            if (tot_syllables + pot_word_syllables) <= n_syllables:
                 states.append(pot_state)
                 emission.append(pot_emission)
                 tot_syllables += pot_word_syllables
-            except Exception:
-                pass
+            else:
+                print("go back")
 
+            # states.append(pot_state)
+            # emission.append(pot_emission)
+            # tot_syllables += pot_word_syllables
+        print(tot_syllables)
         return emission, states
 
 
