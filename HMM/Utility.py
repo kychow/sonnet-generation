@@ -23,16 +23,11 @@ class Utility:
         file = open(filename, "r")
         lines = []
         words_dict = {}
-        # lines_numbered = []
-        translator = str.maketrans('', '', string.punctuation)
+        # translator = str.maketrans('', '', string.punctuation)
         for line in file:
             line = line.strip()
             if line != '' and not line[0].isdigit():
                 words = line.split()
-                # # remove punctuation and capitalization
-                # for i in range(len(words)):
-                #     no_punc_word = words[i].lower().translate(translator)
-                #     words[i] = no_punc_word
 
                 # remove punctuation and capitalization
                 for i in range(len(words)):
@@ -44,16 +39,16 @@ class Utility:
                         words[i] = re.sub(r"[^\w'\s-]" , '', words[i]).lower()
                 lines.append(words)
 
-        lines_numbered = copy.deepcopy(lines)
+        encoded_lines = copy.deepcopy(lines)
         count = 0
-        for i in range(len(lines_numbered)):
-            for j in range(len(lines_numbered[i])):
+        for i in range(len(encoded_lines)):
+            for j in range(len(encoded_lines[i])):
                 word = lines[i][j]
                 if word not in words_dict:
                     words_dict[word] = count
-                    lines_numbered[i][j] = count
+                    encoded_lines[i][j] = count
                     count += 1
                 else:
-                    lines_numbered[i][j] = words_dict[word]
+                    encoded_lines[i][j] = words_dict[word]
 
-        return lines_numbered, words_dict
+        return encoded_lines, words_dict
