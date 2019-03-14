@@ -109,28 +109,6 @@ def parse_observations(text):
 
     return obs, obs_map
 
-
-def get_words_to_syllables_dict():
-    # Convert text to dataset.
-    filename = "../data/Syllable_dictionary.txt"
-    syllables_data = open(filename, "r")
-    # lines = [line.split() for line in syllables_data.split('\n') if line.split()]
-    lines = [line.strip().split() for line in syllables_data]
-
-    syllable_map = {}
-
-    words = []
-    syllables = []
-
-    for line in lines:
-        words.append(line[0])
-        syllables.append(line[1:])
-
-    for i in range(len(lines)):
-        syllable_map[words[i]] = syllables[i]
-
-    return syllable_map
-
 # reverse obs map (words to integers) to integers to words
 def obs_map_reverser(obs_map):
     obs_map_r = {}
@@ -150,15 +128,28 @@ def sample_sentence(hmm, obs_map, n_words=100):
 
     return ' '.join(sentence).capitalize() + '...'
 
-def sample_line(hmm, obs_map, n_syllables=10):
-    # Get dictionary of words to syllables.
-    syllable_map = get_words_to_syllables_dict()
-    # print(syllable_map)
-
+def sample_line(hmm, obs_map, syllable_map, n_syllables=10):
     obs_map_r = obs_map_reverser(obs_map)
 
     # Sample and convert sentence.
     emission, states = hmm.generate_sonnet_emission(obs_map_r, syllable_map, n_syllables)
+    # sonnet_line = [obs_map_r[i] for i in emission]
+    sonnet_line = []
+    # proper_nouns = ["i"]
+    for i in emission:
+        word = obs_map_r[i]
+        if word == "i":
+            # word = word.capitalize()
+            word = "I"
+        sonnet_line.append(word)
+
+    return ' '.join(sonnet_line).capitalize()
+
+def sample_line_rhyme(hmm, rhyme_word, obs_map, syllable_map, n_syllables=10):
+    obs_map_r = obs_map_reverser(obs_map)
+
+    # Sample and convert sentence.
+    emission, states = hmm.generate_sonnet_emission_rhyme(rhyme_word, obs_map_r, syllable_map, n_syllables)
     # sonnet_line = [obs_map_r[i] for i in emission]
     sonnet_line = []
     # proper_nouns = ["i"]
