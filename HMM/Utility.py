@@ -51,6 +51,28 @@ class Utility:
         return encoded_lines, words_dict
 
     @staticmethod
+    def get_words_to_syllables_dict():
+        # Convert text to dataset.
+        filename = "../data/Syllable_dictionary.txt"
+        syllables_data = open(filename, "r")
+        # lines = [line.split() for line in syllables_data.split('\n') if line.split()]
+        lines = [line.strip().split() for line in syllables_data]
+
+        syllable_map = {}
+
+        words = []
+        syllables = []
+
+        for line in lines:
+            words.append(line[0])
+            syllables.append(line[1:])
+
+        for i in range(len(lines)):
+            syllable_map[words[i]] = syllables[i]
+
+        return syllable_map
+
+    @staticmethod
     def create_rhyme_dict():
         rhyme_dict = {}
         lines = Utility.get_lines()
@@ -64,12 +86,12 @@ class Utility:
         s_start_i = 0
         s_end_i = sonnet_length
         for s in range(num_sonnets-1):
-            print("sonnet {}".format(s+1))
+            # print("sonnet {}".format(s+1))
 
             sonnet = lines[s_start_i:s_end_i]
 
             last_words = [line[-1] for line in sonnet]
-            print(last_words)
+            # print(last_words)
             if s == 98:
                 a_rhyme_pair = [last_words[0], last_words[2]]
                 b_rhyme_pair = [last_words[1], last_words[3]]
@@ -99,7 +121,7 @@ class Utility:
                                 e_rhyme_pair, f_rhyme_pair]
 
             else:
-                print(last_words)
+                # print(last_words)
                 a_rhyme_pair = [last_words[0], last_words[2]]
                 b_rhyme_pair = [last_words[1], last_words[3]]
 
@@ -115,7 +137,7 @@ class Utility:
                                 e_rhyme_pair, f_rhyme_pair, g_rhyme_pair]
 
             for rhyme_pair in rhyme_pairs:
-                print(rhyme_pair)
+                # print(rhyme_pair)
                 word_1 = rhyme_pair[0]
                 word_2 = rhyme_pair[1]
                 if word_1 not in rhyme_dict:
@@ -132,7 +154,7 @@ class Utility:
             # ababa cdcd efef gg
             # s_start_i = s * (sonnet_length) + length_compensator
             if s == 97:
-                print("hi")
+                # print("hi")
                 s_start_i += sonnet_length
                 sonnet_length = 15
                 s_end_i += sonnet_length
@@ -148,5 +170,5 @@ class Utility:
                 sonnet_length = 14
                 s_end_i += sonnet_length
 
-        print(rhyme_dict)
+        # print(rhyme_dict)
         return rhyme_dict
