@@ -3,11 +3,13 @@ import numpy as np
 import random
 import string
 from keras.models import Sequential
-from keras.layers import Dense, Embedding, LSTM
+from keras.layers import Dense, Embedding, Lambda
+from keras.layers import LSTM
+from keras import callbacks 
 
 def preprocess(filename="../data/shakespeare.txt", seq_length=40, step=5):
     '''
-       returns semi-redundant sequences their outputs 
+    returns semi-redundant sequences their outputs 
 
     seq_length: number of characters in each sequence
     step: gets every [step] sequence  
@@ -47,29 +49,19 @@ def preprocess(filename="../data/shakespeare.txt", seq_length=40, step=5):
 x, y, sequences, indices_char_dict, char_indices_dict, text = preprocess()
 
 model = Sequential()
-#model.add(Embedding(max_features, output_dim=256))
-model.add(LSTM(128))
-# model.add(Dropout(0.5))
-# standard fully-connected output layer w/ softmax linearity 
+model.add(LSTM(200))
+# add temperature (controls variance)
+#model.add(Lambda(lambda x: x / 1.5))
 model.add(Dense(len(indices_char_dict), activation='softmax'))
-model.compile(loss='categorical_crossentropy',
-              optimizer='rmsprop')
-              #metrics=['accurjacy'])
-model.fit(x, y, batch_size=32, epochs=10, verbose=1)
-#score = model.evaluate(x_test, y_test, batch_size=16)
-
-# make sure enough epochs that loss converges 
-# draw softmax samples from trained model 
-# mess around w/ temperature paremter (controls variance)
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+earlyStopping = [callbacks.EarlyStopping(monitor='loss', verbose=0, mode='auto')]
+model.fit(x, y, epochs=10, verbose=1, callbacks=earlyStopping)
+model.save('lstm.h5')
 
 sonnet = []
-for _ in range(1):
+for _ in range(14):
 
-    # TODO define seed better 
-    seed_index = random.randint(0, len(sequences) - 1)
-    seq = text[seed_index:seed_index + len(sequences[0])] 
-    print("Seed: " + seq)
-
+    seq = "shall i compare thee to a summer's day? "
     line = ""
     for i in range(40):
         x = np.zeros((1, len(seq), len(indices_char_dict)))
@@ -81,8 +73,8 @@ for _ in range(1):
         char = indices_char_dict[index]
         line += char
         seq = seq[1:] + char
-        print(seq)
     
     sonnet.append(seq)
 
-print(sonnet)
+for line in sonnet:
+    print(line)
