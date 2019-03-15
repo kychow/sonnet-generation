@@ -19,8 +19,8 @@ def preprocess(filename="../data/shakespeare.txt", seq_length=40, step=5):
     file = open(filename, "r")
     text = ""
     for line in file:
-        #line = line.strip()
-        if line != '\n' and not line.strip()[0].isdigit():
+        line = line.strip()
+        if line != '' and not line[0].isdigit():
             line.translate(str.maketrans('', '', string.punctuation))
             text += line
 
@@ -55,7 +55,7 @@ def make_model():
     model.add(Dense(len(indices_char_dict), activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
     earlyStopping = [callbacks.EarlyStopping(monitor='loss', verbose=1, mode='auto')]
-    model.fit(x, y, epochs=10, verbose=1, callbacks=earlyStopping)
+    model.fit(x, y, epochs=50, verbose=1, callbacks=earlyStopping)
     model.save('lstm.h5')
     return indices_char_dict, char_indices_dict
 
@@ -64,7 +64,7 @@ def generate_sonnet():
     model = load_model('lstm.h5')
     sonnet = []
     
-    seq = "shall i compare thee to a summer's day?\n"
+    seq = "shall i compare thee to a summer's day? "
     for _ in range(14):
         line = ""
         for i in range(40):
