@@ -19,8 +19,8 @@ def preprocess(filename="../data/shakespeare.txt", seq_length=40, step=5):
     file = open(filename, "r")
     text = ""
     for line in file:
-        line = line.strip()
-        if line != '' and not line[0].isdigit():
+        #line = line.strip()
+        if line != '\n' and not line.strip()[0].isdigit():
             line.translate(str.maketrans('', '', string.punctuation))
             text += line
 
@@ -51,11 +51,11 @@ def make_model():
     model = Sequential()
     model.add(LSTM(200))
     # add temperature (controls variance)
-    # model.add(Lambda(lambda x: x / 1.5))
+    model.add(Lambda(lambda x: x / 1.5))
     model.add(Dense(len(indices_char_dict), activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-    earlyStopping = [callbacks.EarlyStopping(monitor='loss', verbose=0, mode='auto')]
-    model.fit(x, y, epochs=5, verbose=1, callbacks=earlyStopping)
+    earlyStopping = [callbacks.EarlyStopping(monitor='loss', verbose=1, mode='auto')]
+    model.fit(x, y, epochs=10, verbose=1, callbacks=earlyStopping)
     model.save('lstm.h5')
     return indices_char_dict, char_indices_dict
 
@@ -63,8 +63,9 @@ def generate_sonnet():
     x, y, sequences, indices_char_dict, char_indices_dict, text = preprocess()
     model = load_model('lstm.h5')
     sonnet = []
+    
+    seq = "shall i compare thee to a summer's day?\n"
     for _ in range(14):
-        seq = "shall i compare thee to a summer's day? "
         line = ""
         for i in range(40):
             x = np.zeros((1, len(seq), len(indices_char_dict)))
@@ -77,9 +78,10 @@ def generate_sonnet():
             line += char
             seq = seq[1:] + char
 
-        sonnet.append(seq)
+        sonnet.append(line)
 
     for line in sonnet:
         print(line)
-    
+
+make_model()
 generate_sonnet()
