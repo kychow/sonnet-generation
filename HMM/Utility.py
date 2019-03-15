@@ -1,6 +1,7 @@
 import string
 import copy
 import re
+from nltk.corpus import cmudict
 
 class Utility:
     '''
@@ -11,16 +12,15 @@ class Utility:
         pass
 
     @staticmethod
-    def get_lines():
-        filename = "../data/shakespeare.txt"
+    def get_lines(filename):
         file = open(filename, "r")
         lines = []
         # translator = str.maketrans('', '', string.punctuation)
         for line in file:
             line = line.strip()
-            if line != '' and not line[0].isdigit():
+            # if line != '' and not line[0].isdigit():
+            if line != '' and len(line.split()) > 1:
                 words = line.split()
-
                 # remove punctuation and capitalization
                 for i in range(len(words)):
                     if words[i][-1] in [",", ".", "!", "?"]:
@@ -34,7 +34,27 @@ class Utility:
 
     @staticmethod
     def load_shakespeare_hidden():
-        lines = Utility.get_lines()
+        lines = Utility.get_lines("../data/shakespeare.txt")
+        words_dict = {}
+        encoded_lines = copy.deepcopy(lines)
+        count = 0
+        for i in range(len(encoded_lines)):
+            for j in range(len(encoded_lines[i])):
+                word = lines[i][j]
+                if word not in words_dict:
+                    words_dict[word] = count
+                    encoded_lines[i][j] = count
+                    count += 1
+                else:
+                    encoded_lines[i][j] = words_dict[word]
+
+        return encoded_lines, words_dict
+
+    @staticmethod
+    def load_combined_hidden():
+        lines_shakespeare = Utility.get_lines("../data/shakespeare.txt")
+        lines_spenser = Utility.get_lines("../data/spenser.txt")
+        lines = lines_shakespeare + lines_spenser
         words_dict = {}
         encoded_lines = copy.deepcopy(lines)
         count = 0
@@ -73,9 +93,37 @@ class Utility:
         return syllable_map
 
     @staticmethod
+    def get_syllable_count(word):
+        try:
+            syl_dict = cmudict.dict()
+            return [len(list(y for y in x if y[-1].isdigit())) for x in syl_dict[word.lower()]]
+        except KeyError:
+            # word wasn't found in cmudict
+            return [Utility.manual_syllable_count(word)]
+
+    @staticmethod
+    def manual_syllable_count(word):
+        syl_count = 0
+        vowels = 'aeiouy'
+        word = word.lower()
+        if word[0] in vowels:
+            syl_count +=1
+        for i in range(1, len(word)):
+            if word[i] in vowels and word[i-1] not in vowels:
+                syl_count +=1
+        if word[-1] == 'e':
+            syl_count -= 1
+        if word[-1] == 'le':
+            syl_count += 1
+        if syl_count == 0:
+            syl_count = 1
+        return syl_count
+
+    # create rhyme dictionary for shakespeare
+    @staticmethod
     def create_rhyme_dict():
         rhyme_dict = {}
-        lines = Utility.get_lines()
+        lines = Utility.get_lines("../data/shakespeare.txt")
         # last_words = [line[-1] for line in lines]
 
         sonnet_length = 14

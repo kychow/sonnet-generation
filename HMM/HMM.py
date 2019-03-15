@@ -12,6 +12,7 @@ import numpy as np
 from numpy.random import choice
 import math
 import re
+from Utility import Utility
 
 class HiddenMarkovModel:
     '''
@@ -523,6 +524,54 @@ class HiddenMarkovModel:
         states.reverse()
         return emission, states
 
+    def generate_sonnet_combined_emission_rhyme(self, encoded_start_word, obs_map_r, n_syllables):
+        '''
+        Generates an emission with n_syllables syllables, assuming that the starting state
+        is chosen uniformly at random.
+
+        Arguments:
+            n_syllables:          number of syllables of the emission to generate.
+            word_syllables_map:   dictionary of syllables of each word
+
+        Returns:
+            words:   The randomly generated emission as a list.
+        '''
+
+        emission = []
+        states = []
+
+        start_states = [i for i in range(self.L)]
+        state1 = choice(start_states, p=self.A_start)
+        states.append(state1)
+
+        emission.append(encoded_start_word)
+        start_word = obs_map_r[encoded_start_word]
+
+        tot_syllables = 0
+        # tot_syllables += int(re.search(r'\d+', syllables_map[start_word][-1]).group())
+        tot_syllables += Utility.get_syllable_count(start_word)[0]
+
+        # meet syllable count requirement (n_syllables)
+        while tot_syllables < n_syllables:
+            p_val_states = self.A[states[-1]]
+            pot_state = choice([i for i in range(self.L)], p=p_val_states)
+
+            p_val_emissions = self.O[states[-1]]
+            pot_emission = choice([i for i in range(self.D)], p=p_val_emissions)
+
+            pot_word = obs_map_r[pot_emission]
+            # pot_word_syllables_list = syllables_map[pot_word]
+            # n_syl = int(re.search(r'\d+', pot_word_syllables_list[-1]).group())
+            n_syl = Utility.get_syllable_count(pot_word)[0]
+            # print(n_syl)
+            if (tot_syllables + n_syl) <= n_syllables:
+                states.append(pot_state)
+                emission.append(pot_emission)
+                tot_syllables += n_syl
+
+        emission.reverse()
+        states.reverse()
+        return emission, states
 
     def probability_alphas(self, x):
         '''

@@ -12,7 +12,7 @@ rhyme_dict = Utility.create_rhyme_dict()
 # print(rhyme_dict)
 encoded_lines, words_dict = Utility.load_shakespeare_hidden()
 
-hmm = unsupervised_HMM(encoded_lines, 6, 100)
+hmm = unsupervised_HMM(encoded_lines, 6, 10)
 sonnet = [''] * 14
 
 rhyme_scheme = [[0, 2], [1, 3], [4, 6], [5, 7], [8, 10], [9, 11], [12, 13]]

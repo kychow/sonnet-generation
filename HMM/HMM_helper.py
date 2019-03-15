@@ -162,6 +162,23 @@ def sample_line_rhyme(hmm, rhyme_word, obs_map, syllable_map, n_syllables=10):
 
     return ' '.join(sonnet_line).capitalize()
 
+def sample_line_combined_rhyme(hmm, rhyme_word, obs_map, n_syllables=10):
+    obs_map_r = obs_map_reverser(obs_map)
+
+    # Sample and convert sentence.
+    emission, states = hmm.generate_sonnet_combined_emission_rhyme(rhyme_word, obs_map_r, n_syllables)
+    # sonnet_line = [obs_map_r[i] for i in emission]
+    sonnet_line = []
+    # proper_nouns = ["i"]
+    for i in emission:
+        word = obs_map_r[i]
+        if word == "i":
+            # word = word.capitalize()
+            word = "I"
+        sonnet_line.append(word)
+
+    return ' '.join(sonnet_line).capitalize()
+
 ###################
 # HMM VISUALIZATION FUNCTIONS
 ####################
