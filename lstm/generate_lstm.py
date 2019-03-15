@@ -2,7 +2,7 @@
 import numpy as np
 import random
 import string
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense, Embedding, Lambda
 from keras.layers import LSTM
 from keras import callbacks 
@@ -46,35 +46,40 @@ def preprocess(filename="../data/shakespeare.txt", seq_length=40, step=5):
 
     return x, y, sequences, indices_char_dict, char_indices_dict, text
 
-x, y, sequences, indices_char_dict, char_indices_dict, text = preprocess()
+def make_model():
+    x, y, sequences, indices_char_dict, char_indices_dict, text = preprocess()
+    model = Sequential()
+    model.add(LSTM(200))
+    # add temperature (controls variance)
+    # model.add(Lambda(lambda x: x / 1.5))
+    model.add(Dense(len(indices_char_dict), activation='softmax'))
+    model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+    earlyStopping = [callbacks.EarlyStopping(monitor='loss', verbose=0, mode='auto')]
+    model.fit(x, y, epochs=5, verbose=1, callbacks=earlyStopping)
+    model.save('lstm.h5')
+    return indices_char_dict, char_indices_dict
 
-model = Sequential()
-model.add(LSTM(200))
-# add temperature (controls variance)
-#model.add(Lambda(lambda x: x / 1.5))
-model.add(Dense(len(indices_char_dict), activation='softmax'))
-model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-earlyStopping = [callbacks.EarlyStopping(monitor='loss', verbose=0, mode='auto')]
-model.fit(x, y, epochs=10, verbose=1, callbacks=earlyStopping)
-model.save('lstm.h5')
+def generate_sonnet():
+    x, y, sequences, indices_char_dict, char_indices_dict, text = preprocess()
+    model = load_model('lstm.h5')
+    sonnet = []
+    for _ in range(14):
+        seq = "shall i compare thee to a summer's day? "
+        line = ""
+        for i in range(40):
+            x = np.zeros((1, len(seq), len(indices_char_dict)))
+            for t, index in enumerate(seq):
+                x[0, t, char_indices_dict[index]] = 1
 
-sonnet = []
-for _ in range(14):
+            prediction = model.predict(x, verbose=0)[0]
+            index = np.argmax(prediction)
+            char = indices_char_dict[index]
+            line += char
+            seq = seq[1:] + char
 
-    seq = "shall i compare thee to a summer's day? "
-    line = ""
-    for i in range(40):
-        x = np.zeros((1, len(seq), len(indices_char_dict)))
-        for t, index in enumerate(seq):
-            x[0, t, char_indices_dict[index]] = 1
+        sonnet.append(seq)
 
-        prediction = model.predict(x, verbose=0)[0]
-        index = np.argmax(prediction)
-        char = indices_char_dict[index]
-        line += char
-        seq = seq[1:] + char
+    for line in sonnet:
+        print(line)
     
-    sonnet.append(seq)
-
-for line in sonnet:
-    print(line)
+generate_sonnet()
