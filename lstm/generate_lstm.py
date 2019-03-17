@@ -5,7 +5,7 @@ import string
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Embedding, Lambda
 from keras.layers import LSTM
-from keras import callbacks 
+from keras.callbacks import LambdaCallback, EarlyStopping
 
 def preprocess(filename="../data/shakespeare.txt", seq_length=40, step=5):
     '''
@@ -19,20 +19,23 @@ def preprocess(filename="../data/shakespeare.txt", seq_length=40, step=5):
     file = open(filename, "r")
     text = ""
     for line in file:
-        line = line.strip()
-        if line != '' and not line[0].isdigit():
+        line = line.lstrip(' ').rstrip(' ')
+        if line != '\n' and not line[0].isdigit():
             line.translate(str.maketrans('', '', string.punctuation))
-            text += line
+            text += line.lower()
 
     # make char to index and index to char dictionary 
     characters = sorted(list(set(text)))
     char_indices_dict = dict((c, i) for i, c in enumerate(characters))
     indices_char_dict = dict((i, c) for i, c in enumerate(characters))
+    #print(char_indices_dict)
 
     # makes every [step] char sequences of length seq_length and their outputs
     sequences = []
     next_chars = [] # next char that seq in sequences generates
+    #print(repr(text[len(text) - 200:]))
     for i in range(0, len(text) - seq_length, step):
+        #print(i, seq, text[i : i + seq_length])
         sequences.append(text[i : i + seq_length])
         next_chars.append(text[i + seq_length])
 
@@ -46,31 +49,32 @@ def preprocess(filename="../data/shakespeare.txt", seq_length=40, step=5):
 
     return x, y, sequences, indices_char_dict, char_indices_dict, text
 
-def make_model():
+def make_model(temperature=1.0):
     x, y, sequences, indices_char_dict, char_indices_dict, text = preprocess()
     model = Sequential()
     model.add(LSTM(200))
     # add temperature (controls variance)
-    model.add(Lambda(lambda x: x / 1.5))
+    model.add(Lambda(lambda x: x / temperature))
     model.add(Dense(len(indices_char_dict), activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-    earlyStopping = [callbacks.EarlyStopping(monitor='loss', verbose=1, mode='auto')]
-    model.fit(x, y, epochs=50, verbose=1, callbacks=earlyStopping)
+    earlyStopping = EarlyStopping(monitor='loss', patience=3, verbose=1, mode='auto')
+    model.fit(x, y, epochs=100, verbose=1, callbacks=[earlyStopping])
     model.save('lstm.h5')
-    return indices_char_dict, char_indices_dict
 
 def generate_sonnet():
     x, y, sequences, indices_char_dict, char_indices_dict, text = preprocess()
+
     model = load_model('lstm.h5')
     sonnet = []
-    
-    seq = "shall i compare thee to a summer's day? "
+    f = open('output.txt', 'a')
+
+    seq = "shall i compare thee to a summer's day?\n"
     for _ in range(14):
         line = ""
         for i in range(40):
             x = np.zeros((1, len(seq), len(indices_char_dict)))
             for t, index in enumerate(seq):
-                x[0, t, char_indices_dict[index]] = 1
+                x[0, t, char_indices_dict[index]] = 1.
 
             prediction = model.predict(x, verbose=0)[0]
             index = np.argmax(prediction)
@@ -82,6 +86,7 @@ def generate_sonnet():
 
     for line in sonnet:
         print(line)
+        f.write(line)
 
-make_model()
+make_model(0.25)
 generate_sonnet()
